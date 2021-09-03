@@ -8,6 +8,10 @@
 
 ![Image 1](screenshots/screenshot1.png)
 
+![Image 2](screenshots/screenshot2.png)
+
+![File Output](screenshots/screenshot3.png)
+
 #### Instructions for run
 
 1. Clone the **github repo** by `git clone https://github.com/nooobcoder/PythonPingTelnetStatus.git`
