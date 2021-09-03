@@ -6,7 +6,7 @@
 
 ### Screenshots
 
-![Image 1](screenshot/screenshot1.png)
+![Image 1](screenshots/screenshot1.png)
 
 #### Instructions for run
 
