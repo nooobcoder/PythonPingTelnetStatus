@@ -60,9 +60,13 @@ def pingStatistics(ip):
             stats.append(block[1])
             stats.append(block[2])
             stats.append(block[3].strip('\n'))
-        stats.append(re.search(regex_per_loss, output).group(1))
+        loss = re.search(regex_per_loss, output).group(1)
+        stats.append(loss)
         print "  > STATISTICS FOR [ ", ip, " ]  ==>  ", stats
-        return stats
+        if loss == '100%':
+            return ['HOST_DOWN', 'HOST_DOWN', 'HOST_DOWN', 'HOST_DOWN', loss]
+        else:
+            return stats
 
     except:
         print('  > STATISTCS_FAILURE')
