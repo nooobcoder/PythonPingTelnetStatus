@@ -110,8 +110,6 @@ def checkHost(ip, port):
 
     if ping == True:
         lst.append("PING SUCCESS")
-        # Collect ping statistics only when the host is up
-        lst.append(pingStatistics(ip))
     else:
         lst.append("PING FAIL")
     if ipup == True:
@@ -119,6 +117,9 @@ def checkHost(ip, port):
     else:
         lst.append("PORT CLOSED")
 
+    if ping == True:
+        # Collect ping statistics only when the host is up
+        lst.append(pingStatistics(ip))
     """ lst.append(ping)
     lst.append(ipup) """
     return lst
