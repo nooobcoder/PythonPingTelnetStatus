@@ -120,6 +120,7 @@ def checkHost(ip, port):
     if ping == True:
         # Collect ping statistics only when the host is up
         lst.append(pingStatistics(ip))
+    else: lst.append(['--', '--', '-', '--', '100%'])
     """ lst.append(ping)
     lst.append(ipup) """
     return lst
