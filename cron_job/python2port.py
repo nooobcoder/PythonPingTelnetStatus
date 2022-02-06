@@ -7,6 +7,7 @@ import csv
 import io
 import os
 import subprocess
+import sys
 from subprocess import Popen, PIPE
 from header import printHeader
 import re
@@ -20,7 +21,8 @@ timeout = 1
 data = list()
 tailingFilename = str(uuid.uuid4())
 
-folder_name = 'output'
+folder_name = 'cron_output'
+dir_path = os.path.dirname(os.path.realpath(__file__))
 # Create the folder, skip if exists
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
@@ -39,15 +41,17 @@ def isOpen(ip, port):
         s.close()
 
 
-pingcount = raw_input("ENTER PACKET COUNTS: ")
-telnetretry = int(raw_input("ENTER TELNET RETRIES: "))
+pingcount = 3
+telnetretry = 3
 
 
 def pingStatistics(ip):
+    ip=str(ip)
+    print(ip)
     print "  > GETTING STATISTICS FOR [ ", ip, " ]"
 
     try:
-        command = "ping6 -W 1 -c "+pingcount+" "+ip
+        command = "ping6 -W 1 -c "+str(pingcount)+" "+str(ip)
         process = Popen(command, stdout=PIPE, stderr=None, shell=True)
         output = process.communicate()[0]
 
@@ -75,7 +79,7 @@ def pingStatistics(ip):
 def pingSuccess(ip):
     hostname = ip
     # -i for duration, -c for packet count
-    response = os.system("ping6 -W 1 -c " + pingcount+" " + hostname)
+    response = os.system("ping6 -W 1 -c " +str( pingcount)+" " + str(hostname))
     if response == 0:
         return 0
     else:
@@ -125,6 +129,14 @@ def checkHost(ip, port):
     lst.append(ipup) """
     return lst
 
+def read_cmd_args():
+    filename=sys.argv[0] # This will have the filename being executed
+    csv_input=sys.argv[1] # This shall contain the csv data input filename.
+    print "Reading data from file: "+csv_input
+    return csv_input
+
+
+filename = read_cmd_args()
 
 def readFromCSV(filename):
     with io.open(filename+'.csv', newline='') as f:
@@ -156,19 +168,24 @@ def extractToCSV(listData):
             print("{}".format(first))
 
             wr.writerow(first)
+def read_cmd_args():
+    filename=sys.argv[0] # This will have the filename being executed
+    csv_input=sys.argv[1] # This shall contain the csv data input filename.
+    print "Reading data from file: "+csv_input
+    return csv_input
 
 
-filename = raw_input(
-    "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
+filename = read_cmd_args()
 print(filename)
 readFromCSV(filename)
-with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
+with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
     for ips in data:
         for index, ips_get in enumerate(ips):
             print "[ ```````````````````````````````````````````` ]"
             print("[ RUN {} ]".format(index+1))
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
+            print("FLAG: ",get_lst)
             file.write(
                 unicode(ips_get[0]+"\t" +
                         str(get_lst[0])+"\t" +
@@ -177,9 +194,10 @@ with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'w', 
                         str(get_lst[2][1])+"\t" +
                         str(get_lst[2][2])+"\t" +
                         str(get_lst[2][3])+"\t" +
-                        str(get_lst[2][4].strip())+"\n"))
+                        str(get_lst[2][4])+"\n"))
 
             print "[ ```````````````````````````````````````````` ]\n\n"
+
 
 
 printHeader()

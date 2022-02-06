@@ -1,0 +1,4 @@
+15 18 * * * /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py ipaddr_jobs
+35 19 * * * /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py HostIPs1
+20 20 * * * /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py HostIPs2
+20 21 * * * /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py HostIPs3
