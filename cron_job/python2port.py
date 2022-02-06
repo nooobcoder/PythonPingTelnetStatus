@@ -185,7 +185,6 @@ with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt
             print("[ RUN {} ]".format(index+1))
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
-            print("FLAG: ",get_lst)
             file.write(
                 unicode(ips_get[0]+"\t" +
                         str(get_lst[0])+"\t" +
