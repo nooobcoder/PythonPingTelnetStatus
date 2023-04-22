@@ -22,7 +22,9 @@ data = list()
 tailingFilename = str(uuid.uuid4())
 
 folder_name = 'cron_output'
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = os.path.abspath(os.getcwd())+"/OPT/pingTester/Test/Temp/cron_job"
+print("DIR: ", dir_path)
+
 # Create the folder, skip if exists
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
@@ -152,14 +154,14 @@ def preprocess(s):
 
 
 def getFileData():
-    with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'r', newline='') as flhndl:
+    with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt"), 'r', newline='') as flhndl:
         return flhndl.readlines()
 
 
 def extractToCSV(listData):
     header = ['HOST IP', 'PING STATUS', 'TELNET STATUS',
               'MIN', 'MAX', 'AVG', 'LATENCY', 'LOSS %']
-    with io.open(os.path.join(folder_name, "Output_ResultsCSV_"+tailingFilename+".csv"), 'wb') as myfile:
+    with io.open(os.path.join(dir_path,folder_name, "Output_ResultsCSV_"+filename.split("/")[-1]+"_"+tailingFilename+".csv"), 'wb') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(header)
         for lines in listData:
@@ -168,14 +170,15 @@ def extractToCSV(listData):
             print("{}".format(first))
 
             wr.writerow(first)
+
 def read_cmd_args():
     filename=sys.argv[0] # This will have the filename being executed
     csv_input=sys.argv[1] # This shall contain the csv data input filename.
     print "Reading data from file: "+csv_input
     return csv_input
-
-
 filename = read_cmd_args()
+
+
 print(filename)
 readFromCSV(filename)
 with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
@@ -185,6 +188,7 @@ with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt
             print("[ RUN {} ]".format(index+1))
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
+            print("FLAG: ",get_lst)
             file.write(
                 unicode(ips_get[0]+"\t" +
                         str(get_lst[0])+"\t" +
@@ -202,4 +206,3 @@ with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt
 printHeader()
 data = getFileData()
 extractToCSV(data)
-
