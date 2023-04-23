@@ -206,6 +206,8 @@ if not args.file:
         "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
     print(filename)
 readFromCSV(filename)
+
+print("TXT FILE NAME: "+"Results_"+tailingFilename+".txt")
 with io.open(os.path.join(dir_path, folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
     for ips in data:
         for index, ips_get in enumerate(ips):
