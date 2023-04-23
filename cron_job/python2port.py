@@ -6,6 +6,7 @@ import uuid
 import csv
 import io
 import os
+import argparse
 import subprocess
 import sys
 from subprocess import Popen, PIPE
@@ -22,12 +23,20 @@ data = list()
 tailingFilename = str(uuid.uuid4())
 
 folder_name = 'cron_output'
-dir_path = os.path.abspath(os.getcwd())+"/OPT/pingTester/Test/Temp/cron_job"
+# dir_path = os.path.abspath(os.getcwd())+"/OPT/pingTester/Test/Temp/cron_job"
+
+# Get executing python file path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 print("DIR: ", dir_path)
 
 # Create the folder, skip if exists
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
+
+pingcount = 4
+telnetretry = 4
+filename = ""
 
 
 def isOpen(ip, port):
@@ -43,12 +52,8 @@ def isOpen(ip, port):
         s.close()
 
 
-pingcount = 3
-telnetretry = 3
-
-
 def pingStatistics(ip):
-    ip=str(ip)
+    ip = str(ip)
     print(ip)
     print "  > GETTING STATISTICS FOR [ ", ip, " ]"
 
@@ -81,7 +86,7 @@ def pingStatistics(ip):
 def pingSuccess(ip):
     hostname = ip
     # -i for duration, -c for packet count
-    response = os.system("ping6 -W 1 -c " +str( pingcount)+" " + str(hostname))
+    response = os.system("ping6 -W 1 -c " + str(pingcount)+" " + str(hostname))
     if response == 0:
         return 0
     else:
@@ -126,19 +131,22 @@ def checkHost(ip, port):
     if ping == True:
         # Collect ping statistics only when the host is up
         lst.append(pingStatistics(ip))
-    else: lst.append(['--', '--', '-', '--', '100%'])
+    else:
+        lst.append(['--', '--', '-', '--', '100%'])
     """ lst.append(ping)
     lst.append(ipup) """
     return lst
 
+
 def read_cmd_args():
-    filename=sys.argv[0] # This will have the filename being executed
-    csv_input=sys.argv[1] # This shall contain the csv data input filename.
+    filename = sys.argv[0]  # This will have the filename being executed
+    csv_input = sys.argv[1]  # This shall contain the csv data input filename.
     print "Reading data from file: "+csv_input
     return csv_input
 
 
 filename = read_cmd_args()
+
 
 def readFromCSV(filename):
     with io.open(filename+'.csv', newline='') as f:
@@ -154,14 +162,14 @@ def preprocess(s):
 
 
 def getFileData():
-    with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt"), 'r', newline='') as flhndl:
+    with io.open(os.path.join(dir_path, folder_name, "Results_"+tailingFilename+".txt"), 'r', newline='') as flhndl:
         return flhndl.readlines()
 
 
 def extractToCSV(listData):
     header = ['HOST IP', 'PING STATUS', 'TELNET STATUS',
               'MIN', 'MAX', 'AVG', 'LATENCY', 'LOSS %']
-    with io.open(os.path.join(dir_path,folder_name, "Output_ResultsCSV_"+filename.split("/")[-1]+"_"+tailingFilename+".csv"), 'wb') as myfile:
+    with io.open(os.path.join(dir_path, folder_name, "Output_ResultsCSV_"+filename.split("/")[-1]+"_"+tailingFilename+".csv"), 'wb') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(header)
         for lines in listData:
@@ -171,24 +179,41 @@ def extractToCSV(listData):
 
             wr.writerow(first)
 
+
 def read_cmd_args():
-    filename=sys.argv[0] # This will have the filename being executed
-    csv_input=sys.argv[1] # This shall contain the csv data input filename.
-    print "Reading data from file: "+csv_input
-    return csv_input
-filename = read_cmd_args()
+    # Read command line arguments with python2
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", help="File name to read from")
+    parser.add_argument("-pc", "--packet_counts", help="Number of packets")
+    parser.add_argument("-tr", "--telnet_retries", help="Telnet retries")
+
+    args = parser.parse_args()
+    return args
 
 
-print(filename)
+args = read_cmd_args()
+# Parse the cmd args and store them in the variables
+pingcount = args.packet_counts
+telnetretry = args.telnet_retries
+filename = args.file
+
+if not args.packet_counts:
+    pingcount = raw_input("ENTER PACKET COUNTS: ")
+if not args.telnet_retries:
+    telnetretry = int(raw_input("ENTER TELNET RETRIES: "))
+if not args.file:
+    filename = raw_input(
+        "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
+    print(filename)
 readFromCSV(filename)
-with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
+with io.open(os.path.join(dir_path, folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
     for ips in data:
         for index, ips_get in enumerate(ips):
             print "[ ```````````````````````````````````````````` ]"
             print("[ RUN {} ]".format(index+1))
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
-            print("FLAG: ",get_lst)
+            print("FLAG: ", get_lst)
             file.write(
                 unicode(ips_get[0]+"\t" +
                         str(get_lst[0])+"\t" +
@@ -200,7 +225,6 @@ with io.open(os.path.join(dir_path,folder_name, "Results_"+tailingFilename+".txt
                         str(get_lst[2][4])+"\n"))
 
             print "[ ```````````````````````````````````````````` ]\n\n"
-
 
 
 printHeader()
