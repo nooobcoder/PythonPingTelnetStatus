@@ -1,3 +1,6 @@
+# Ignore generated output directories
+cron_job/cron_output
+
 *.py[co]
 *~
 *.egg-info
