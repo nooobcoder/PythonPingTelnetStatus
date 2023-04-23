@@ -15,10 +15,31 @@
 #### Instructions for run
 
 1. Clone the **github repo** by `git clone https://github.com/nooobcoder/PythonPingTelnetStatus.git`
+
 2. Check if **Python2** is installed
-   `python --version`
+
+`python --version`
+
 3. Run the script using: `python python2port.py`
 
 _After the script has run, check the newly created **output** folder where the resultant files are output_
+
+---
+
+## Running the script with arguments
+
+#### Inputs:
+
+-   `-f, --file`: The file name to read from.
+
+-   `-pc, --packet_counts`: The number of packets.
+
+-   `-tr, --telnet_retries`: The number of telnet retries.
+
+#### Example Usage:
+
+```bash
+python python2port.py  -f  input.csv  -pc  4  -tr  4
+```
 
 ---

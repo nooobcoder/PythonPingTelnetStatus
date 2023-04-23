@@ -32,6 +32,15 @@ filename = ""
 
 
 def read_cmd_args():
+    """
+        Read command line arguments
+        Inputs:
+            -f, --file: File name to read from
+            -pc, --packet_counts: Number of packets
+            -tr, --telnet_retries: Telnet retries
+        Returns:
+            args: Command line arguments
+    """
     # Read command line arguments with python2
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="File name to read from")
