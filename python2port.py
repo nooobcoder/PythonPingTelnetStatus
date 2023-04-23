@@ -68,7 +68,7 @@ def pingStatistics(ip):
     print "  > GETTING STATISTICS FOR [ ", ip, " ]"
 
     try:
-        command = "ping6 -W 1 -c " + pingcount + " " + ip
+        command = "ping6 -W 1 -c " + str(pingcount) + " " + str(ip)
         process = Popen(command, stdout=PIPE, stderr=None, shell=True)
         output = process.communicate()[0]
 
@@ -90,7 +90,7 @@ def pingStatistics(ip):
             return stats
 
     except BaseException:
-        print('  > STATISTCS_FAILURE')
+        print('  > STATISTCS_FAILURE'+BaseException)
 
 
 def pingSuccess(ip):
