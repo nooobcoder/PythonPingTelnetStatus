@@ -183,8 +183,8 @@ def extractToCSV(listData):
 
 args = read_cmd_args()
 # Parse the cmd args and store them in the variables
-pingcount = int(args.packet_counts)
-telnetretry = int(args.telnet_retries)
+pingcount = args.packet_counts
+telnetretry = args.telnet_retries
 filename = args.file
 
 if not args.packet_counts:
@@ -195,6 +195,9 @@ if not args.file:
     filename = raw_input(
         "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
     print(filename)
+
+pingcount = int(args.packet_counts)
+telnetretry = int(args.telnet_retries)
 
 readFromCSV(filename)
 with io.open(os.path.join(folder_name, "Results_" + tailingFilename + ".txt"), 'w', newline='') as file:
