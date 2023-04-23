@@ -96,7 +96,8 @@ def pingStatistics(ip):
 def pingSuccess(ip):
     hostname = ip
     # -i for duration, -c for packet count
-    response = os.system("ping6 -W 1 -c " + pingcount + " " + hostname)
+    response = os.system("ping6 -W 1 -c " +
+                         str(pingcount) + " " + str(hostname))
     if response == 0:
         return 0
     else:
@@ -182,8 +183,8 @@ def extractToCSV(listData):
 
 args = read_cmd_args()
 # Parse the cmd args and store them in the variables
-pingcount = args.packet_counts
-telnetretry = args.telnet_retries
+pingcount = int(args.packet_counts)
+telnetretry = int(args.telnet_retries)
 filename = args.file
 
 if not args.packet_counts:
@@ -204,14 +205,14 @@ with io.open(os.path.join(folder_name, "Results_" + tailingFilename + ".txt"), '
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
             file.write(
-                unicode(ips_get[0] + "\t" +
-                        str(get_lst[0]) + "\t" +
-                        str(get_lst[1]) + "\t" +
-                        str(get_lst[2][0]) + "\t" +
-                        str(get_lst[2][1]) + "\t" +
-                        str(get_lst[2][2]) + "\t" +
-                        str(get_lst[2][3]) + "\t" +
-                        str(get_lst[2][4].strip()) + "\n"))
+                unicode(ips_get[0]+"\t" +
+                        str(get_lst[0])+"\t" +
+                        str(get_lst[1])+"\t" +
+                        str(get_lst[2][0])+"\t" +
+                        str(get_lst[2][1])+"\t" +
+                        str(get_lst[2][2])+"\t" +
+                        str(get_lst[2][3])+"\t" +
+                        str(get_lst[2][4])+"\n"))
 
             print "[ ```````````````````````````````````````````` ]\n\n"
 

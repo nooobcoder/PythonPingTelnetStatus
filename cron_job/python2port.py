@@ -193,8 +193,8 @@ def read_cmd_args():
 
 args = read_cmd_args()
 # Parse the cmd args and store them in the variables
-pingcount = args.packet_counts
-telnetretry = args.telnet_retries
+pingcount = int(args.packet_counts)
+telnetretry = int(args.telnet_retries)
 filename = args.file
 
 if not args.packet_counts:
