@@ -5,7 +5,9 @@ import os
 
 def clear():
     # check and make call for specific operating system
-    _ = call('clear' if os.name == 'posix' else 'cls')
+    # !WARN: Below line of code is deprecated due to incompatibility with Windows
+    # _ = call('clear' if os.name == 'posix' else 'cls')
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def printHeader():

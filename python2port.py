@@ -6,6 +6,7 @@ import uuid
 import csv
 import io
 import os
+import argparse
 import subprocess
 from subprocess import Popen, PIPE
 from header import printHeader
@@ -25,6 +26,21 @@ folder_name = 'output'
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
+pingcount = 4
+telnetretry = 4
+filename = ""
+
+
+def read_cmd_args():
+    # Read command line arguments with python2
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", help="File name to read from")
+    parser.add_argument("-pc", "--packet_counts", help="Number of packets")
+    parser.add_argument("-tr", "--telnet_retries", help="Telnet retries")
+
+    args = parser.parse_args()
+    return args
+
 
 def isOpen(ip, port):
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -33,21 +49,17 @@ def isOpen(ip, port):
         s.connect((ip, int(port), 0, 0))
         s.shutdown(socket.SHUT_RDWR)
         return True
-    except:
+    except BaseException:
         return False
     finally:
         s.close()
-
-
-pingcount = raw_input("ENTER PACKET COUNTS: ")
-telnetretry = int(raw_input("ENTER TELNET RETRIES: "))
 
 
 def pingStatistics(ip):
     print "  > GETTING STATISTICS FOR [ ", ip, " ]"
 
     try:
-        command = "ping6 -W 1 -c "+pingcount+" "+ip
+        command = "ping6 -W 1 -c " + pingcount + " " + ip
         process = Popen(command, stdout=PIPE, stderr=None, shell=True)
         output = process.communicate()[0]
 
@@ -68,14 +80,14 @@ def pingStatistics(ip):
         else:
             return stats
 
-    except:
+    except BaseException:
         print('  > STATISTCS_FAILURE')
 
 
 def pingSuccess(ip):
     hostname = ip
     # -i for duration, -c for packet count
-    response = os.system("ping6 -W 1 -c " + pingcount+" " + hostname)
+    response = os.system("ping6 -W 1 -c " + pingcount + " " + hostname)
     if response == 0:
         return 0
     else:
@@ -91,11 +103,11 @@ def checkHost(ip, port):
         for i in range(retry):
             print('=> ping success')
 
-            for x in range(1, telnetretry+1):
+            for x in range(1, telnetretry + 1):
                 telnetStatus = isOpen(ip, port)
                 if x != 1:
                     print "[ ! WARN !   Retrying telnet (", x, ")...  ]"
-                if telnetStatus == True:
+                if telnetStatus:
                     ipup = True
                     break
                 else:
@@ -108,26 +120,27 @@ def checkHost(ip, port):
     else:
         ping = ipup = False
 
-    if ping == True:
+    if ping:
         lst.append("PING SUCCESS")
     else:
         lst.append("PING FAIL")
-    if ipup == True:
+    if ipup:
         lst.append("PORT OPEN")
     else:
         lst.append("PORT CLOSED")
 
-    if ping == True:
+    if ping:
         # Collect ping statistics only when the host is up
         lst.append(pingStatistics(ip))
-    else: lst.append(['--', '--', '-', '--', '100%'])
+    else:
+        lst.append(['--', '--', '-', '--', '100%'])
     """ lst.append(ping)
     lst.append(ipup) """
     return lst
 
 
 def readFromCSV(filename):
-    with io.open(filename+'.csv', newline='') as f:
+    with io.open(filename + '.csv', newline='') as f:
         reader = csv.reader(f)
         data.append(list(reader))
     f.close()
@@ -140,14 +153,14 @@ def preprocess(s):
 
 
 def getFileData():
-    with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'r', newline='') as flhndl:
+    with io.open(os.path.join(folder_name, "Results_" + tailingFilename + ".txt"), 'r', newline='') as flhndl:
         return flhndl.readlines()
 
 
 def extractToCSV(listData):
     header = ['HOST IP', 'PING STATUS', 'TELNET STATUS',
               'MIN', 'MAX', 'AVG', 'LATENCY', 'LOSS %']
-    with io.open(os.path.join(folder_name, "Output_ResultsCSV_"+tailingFilename+".csv"), 'wb') as myfile:
+    with io.open(os.path.join(folder_name, "Output_ResultsCSV_" + tailingFilename + ".csv"), 'wb') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(header)
         for lines in listData:
@@ -158,26 +171,38 @@ def extractToCSV(listData):
             wr.writerow(first)
 
 
-filename = raw_input(
-    "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
-print(filename)
+args = read_cmd_args()
+# Parse the cmd args and store them in the variables
+pingcount = args.packet_counts
+telnetretry = args.telnet_retries
+filename = args.file
+
+if not args.packet_counts:
+    pingcount = raw_input("ENTER PACKET COUNTS: ")
+if not args.telnet_retries:
+    telnetretry = int(raw_input("ENTER TELNET RETRIES: "))
+if not args.file:
+    filename = raw_input(
+        "ENTER THE FILE NAME WITHOUT THE EXTENSION (DEFAULT FORMAT CSV):  ")
+    print(filename)
+
 readFromCSV(filename)
-with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'w', newline='') as file:
+with io.open(os.path.join(folder_name, "Results_" + tailingFilename + ".txt"), 'w', newline='') as file:
     for ips in data:
         for index, ips_get in enumerate(ips):
             print "[ ```````````````````````````````````````````` ]"
-            print("[ RUN {} ]".format(index+1))
+            print("[ RUN {} ]".format(index + 1))
             get_lst = list()
             get_lst = checkHost(ips_get[0], port)
             file.write(
-                unicode(ips_get[0]+"\t" +
-                        str(get_lst[0])+"\t" +
-                        str(get_lst[1])+"\t" +
-                        str(get_lst[2][0])+"\t" +
-                        str(get_lst[2][1])+"\t" +
-                        str(get_lst[2][2])+"\t" +
-                        str(get_lst[2][3])+"\t" +
-                        str(get_lst[2][4].strip())+"\n"))
+                unicode(ips_get[0] + "\t" +
+                        str(get_lst[0]) + "\t" +
+                        str(get_lst[1]) + "\t" +
+                        str(get_lst[2][0]) + "\t" +
+                        str(get_lst[2][1]) + "\t" +
+                        str(get_lst[2][2]) + "\t" +
+                        str(get_lst[2][3]) + "\t" +
+                        str(get_lst[2][4].strip()) + "\n"))
 
             print "[ ```````````````````````````````````````````` ]\n\n"
 
@@ -185,4 +210,3 @@ with io.open(os.path.join(folder_name, "Results_"+tailingFilename+".txt"), 'w', 
 printHeader()
 data = getFileData()
 extractToCSV(data)
-
