@@ -58,7 +58,7 @@ def pingStatistics(ip):
     print "  > GETTING STATISTICS FOR [ ", ip, " ]"
 
     try:
-        command = "ping6 -W 1 -c "+str(pingcount)+" "+str(ip)
+        command = "ping6 -i 0.2 -W 1 -c "+str(pingcount)+" "+str(ip)
         process = Popen(command, stdout=PIPE, stderr=None, shell=True)
         output = process.communicate()[0]
 
@@ -86,7 +86,8 @@ def pingStatistics(ip):
 def pingSuccess(ip):
     hostname = ip
     # -i for duration, -c for packet count
-    response = os.system("ping6 -W 1 -c " + str(pingcount)+" " + str(hostname))
+    response = os.system("ping6 -i 0.2 -W 1 -c " +
+                         str(pingcount)+" " + str(hostname))
     if response == 0:
         return 0
     else:
