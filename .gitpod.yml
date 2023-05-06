@@ -1,0 +1,18 @@
+image: ghcr.io/conda/conda-ci:main-linux-python3.9
+tasks:
+    - name: initialize
+      init: |
+          mkdir -p .vscode
+          echo '{"python.pythonPath": "/opt/conda/bin/python"}' > .vscode/settings.json
+          git tag "$(git tag --sort=committerdate | tail -1).dev"
+          eval "$(sudo /opt/conda/bin/python -m conda init --dev bash)"
+          sudo su root -c "/opt/conda/bin/conda install -yq conda-build"
+      command: |
+          eval "$(sudo /opt/conda/bin/python -m conda init --dev bash)"
+
+    - name: ImportGPG
+      command: >
+          [[ ! -z $GNUPG_KEY  ]] &&
+          gpg --verbose --batch --import <(echo $GNUPG_KEY|base64 -d) &&
+          echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf &&
+          git config commit.gpgsign true
