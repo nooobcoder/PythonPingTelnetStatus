@@ -1,71 +1,40 @@
 #!/bin/bash
 
-DEFAULT_PING_COUNT=4
-DEFAULT_TELNET_RETRY=4
-DEFAULT_LOG_FILENAME="logs.log"
-
-# function to generate cron job string
-generate_cron_job_string() {
-  cron_pattern=$1
-  ping_check_filename=$2
-  ping_count=$3
-  telnet_retry=$4
-  log_filename=$5
-
-  cron_job_string="$cron_pattern /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py -f /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/$ping_check_filename -pc $ping_count -tr $telnet_retry &>/home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/cron_output/$log_filename"
-
-  echo "$cron_job_string"
-}
-
-# function to increment log filename
-increment_log_filename() {
-  log_filename=$1
-
-  if [[ $log_filename == $DEFAULT_LOG_FILENAME ]]; then
-    new_log_filename="logs2.log"
-  else
-    log_number=$(echo "$log_filename" | sed 's/[^0-9]*//g')
-    new_log_number=$((log_number+1))
-    new_log_filename="logs$new_log_number.log"
-  fi
-
-  echo "$new_log_filename"
-}
-
-# prompt user to remove existing cron jobs
-read -p "Do you want to remove existing cron jobs? (y/n): " remove_existing
-
-if [[ $remove_existing == "y" ]]; then
-  # remove existing cron jobs
-  crontab -r
+# Ask if the user wants to remove existing cron jobs
+read -p "Do you want to remove existing cron jobs? (y/n): " remove_cron_jobs
+if [[ "$remove_cron_jobs" == "y" ]]; then
+    # Remove existing cron jobs
+    crontab -r
 fi
 
+# Loop to create new cron jobs
 while true; do
-  # prompt user for input
-  read -p "Enter cron pattern (e.g. 58 11 * * *): " cron_pattern
-  read -p "Enter ping check filename: " ping_check_filename
-  read -p "Enter ping count (default $DEFAULT_PING_COUNT): " ping_count_input
-  ping_count=${ping_count_input:-$DEFAULT_PING_COUNT}
-  read -p "Enter telnet retry (default $DEFAULT_TELNET_RETRY): " telnet_retry_input
-  telnet_retry=${telnet_retry_input:-$DEFAULT_TELNET_RETRY}
-  read -p "Enter log filename (default $DEFAULT_LOG_FILENAME): " log_filename
-  log_filename=${log_filename:-$DEFAULT_LOG_FILENAME}
+    # Get user input for cron pattern, filename, ping count, telnet retry, and log file name
+    read -p "Enter cron pattern (e.g. '58 11 * * *'): " cron_pattern
+    read -p "Enter filename (e.g. 'pingcheck1'): " filename
+    read -p "Enter ping count (default 4): " ping_count
+    ping_count=${ping_count:-4}  # Set default value if user input is empty
+    read -p "Enter telnet retry (default 4): " telnet_retry
+    telnet_retry=${telnet_retry:-4}  # Set default value if user input is empty
+    read -p "Enter log file name (default 'logs.log'): " log_file
+    log_file=${log_file:-logs.log}  # Set default value if user input is empty
 
-  # generate cron job string and output to user
-  cron_job_string=$(generate_cron_job_string "$cron_pattern" "$ping_check_filename" "$ping_count" "$telnet_retry" "$log_filename")
-  echo "Cron job string: $cron_job_string"
+    # Build cron job string
+    cron_job_string="$cron_pattern /usr/bin/python /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/python2port.py -f /home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/$filename -pc $ping_count -tr $telnet_retry &>/home/biswajit.p@ami.local/OPT/pingTester/Test/Temp/cron_job/cron_output/$log_file"
 
-  # prompt user to build another cron job
-  read -p "Do you want to build another cron job? (y/n): " build_another
+    # Confirm cron job string with the user
+    echo "Your cron job is:"
+    echo "$cron_job_string"
+    read -p "Is this correct? (y/n): " confirm
+    if [[ "$confirm" == "y" ]]; then
+        # Add new cron job to crontab
+        (crontab -l ; echo "$cron_job_string") | crontab -
+        echo "Cron job added successfully."
+    fi
 
-  # exit loop if user does not want to build another cron job
-  if [[ $build_another == "n" ]]; then
-    break
-  fi
-
-  # increment log filename for next iteration
-  DEFAULT_LOG_FILENAME=$(increment_log_filename "$log_filename")
+    # Ask if the user wants to create another cron job
+    read -p "Do you want to create another cron job? (y/n): " create_another
+    if [[ "$create_another" == "n" ]]; then
+        break
+    fi
 done
-
-# set cron jobs
-echo "$cron_job_string" | crontab -
