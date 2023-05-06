@@ -11,6 +11,7 @@ cron_job/cron_output
 *.nja
 output/
 conda/
+.conda/
 # Editor temporary/working/backup files #
 #########################################
 .#*
