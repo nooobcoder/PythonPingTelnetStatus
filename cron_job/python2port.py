@@ -28,6 +28,7 @@ folder_name = 'cron_output'
 # Get executing python file path
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # Set unbuffered mode
 print("DIR: ", dir_path)
 
 # Create the folder, skip if exists
